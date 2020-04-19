@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">QA_App</string>
     <string name="action_settings">Settings</string>
+    <string name="login_hint_mail_address">メールアドレス</string>
+    <string name="login_hint_password">パスワード(6文字以上)</string>
+    <string name="login_hint_name">表示名</string>
+    <string name="login_button_login">ログイン</string>
+    <string name="login_button_create_account">アカウント作成</string>
+
+    <string name="snackbar_error_create_account">アカウント作成に失敗しました</string>
+    <string name="snackbar_error_login">ログインに失敗しました</string>
+    <string name="snackbar_error_input">正しく入力してください</string>
 </resources>

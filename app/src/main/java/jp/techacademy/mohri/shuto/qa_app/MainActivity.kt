@@ -1,23 +1,43 @@
 package jp.techacademy.mohri.shuto.qa_app
 
+import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toolbar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    /**
+     * クラス名.
+     */
+    private val CLASS_NAME = "MainActivity"
+    /**
+     * ツールバー.
+     */
+    private lateinit var mToolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        val fab = findViewById<FloatingActionButton>(R.id.faButton)
+        fab.setOnClickListener { _ ->
+            // ログイン済みのユーザを取得.
+            val user = FirebaseAuth.getInstance().currentUser
+
+            if (user == null) {
+                // ログイン画面遷移.
+                val intent = Intent(applicationContext, LoginActivity::class.java)
+                startActivity(intent)
+
+            }
         }
     }
 
