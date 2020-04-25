@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="jp.techacademy.mohri.shuto.qa_app">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,6 +24,8 @@
         </activity>
 
         <activity android:name=".LoginActivity" />
+        <activity android:name=".SettingActivity" />
+        <activity android:name=".QuestionSendActivity" />
     </application>
 
 </manifest>

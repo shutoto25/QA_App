@@ -1,13 +1,39 @@
 <resources>
+    <!--アプリ情報-->
     <string name="app_name">QA_App</string>
-    <string name="action_settings">Settings</string>
+    <string name="main_menu_settings">設定</string>
+    <string name="title_bar_login">ログイン</string>
+    <string name="title_bar_setting">設定</string>
+
+    <!--ログイン画面-->
     <string name="login_hint_mail_address">メールアドレス</string>
     <string name="login_hint_password">パスワード(6文字以上)</string>
     <string name="login_hint_name">表示名</string>
     <string name="login_button_login">ログイン</string>
     <string name="login_button_create_account">アカウント作成</string>
-
     <string name="snackbar_error_create_account">アカウント作成に失敗しました</string>
     <string name="snackbar_error_login">ログインに失敗しました</string>
     <string name="snackbar_error_input">正しく入力してください</string>
+
+    <!--メイン画面-->
+    <string name="navigation_header_text">ジャンル選択</string>
+    <string name="navigation_item_hobby">趣味</string>
+    <string name="navigation_item_life">生活</string>
+    <string name="navigation_item_health">健康</string>
+    <string name="navigation_item_computer">コンピュータ</string>
+
+    <!--設定画面-->
+    <string name="settings_hint_display_name">表示名</string>
+    <string name="settings_button_change_name">変更</string>
+    <string name="settings_button_logout">ログアウト</string>
+    <string name="snackbar_error_not_login">ログインしていません</string>
+    <string name="snackbar_success_change_name">表示名を変更しました</string>
+    <string name="snackbar_logout">ログアウトしました</string>
+
+    <!--質問投稿画面-->
+    <string name="question_text_title">タイトル</string>
+    <string name="question_text_subject">質問内容</string>
+    <string name="question_text_capture">添付画像</string>
+    <string name="question_button_send">投稿</string>
+
 </resources>

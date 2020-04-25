@@ -3,6 +3,7 @@ package jp.techacademy.mohri.shuto.qa_app
 import android.content.Context
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
@@ -44,14 +45,10 @@ class LoginActivity : AppCompatActivity() {
      */
     private var mIsCreateAccount = false
 
-    /**
-     * Preference Key.
-     */
-    private val PREFERENCE_KEY_ACCOUNT_NAME =
-        "jp.techacademy.mohri.shuto.qa_app.PREFERENCE_KEY_ACCOUNT_NAME"
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "$CLASS_NAME.onCreate")
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
@@ -60,7 +57,7 @@ class LoginActivity : AppCompatActivity() {
         mAuth = FirebaseAuth.getInstance()
 
         // Firebase関連リスナー作成.
-        createListeners()
+        createFirebaseListeners()
 
         // アカウント作成ボタンクリック処理を設定.
         btCreateAccount.setOnClickListener { view ->
@@ -118,9 +115,8 @@ class LoginActivity : AppCompatActivity() {
                 ).show()
             }
         }
-
         // タイトルバーのタイトルを設定.
-        title = "ログイン"
+        title = getString(R.string.title_bar_login)
     }
 
 
@@ -128,6 +124,8 @@ class LoginActivity : AppCompatActivity() {
      * Firebaseアカウント作成.
      */
     private fun createAccount(email: String, password: String) {
+        Log.d(TAG, "$CLASS_NAME.createAccount")
+
         // プログレスバー表示.
         pbProgressBar.visibility = View.VISIBLE
 
@@ -142,6 +140,8 @@ class LoginActivity : AppCompatActivity() {
      * Firebaseにログイン.
      */
     private fun login(email: String, password: String) {
+        Log.d(TAG, "$CLASS_NAME.login")
+
         // プログレスバー表示.
         pbProgressBar.visibility = View.VISIBLE
 
@@ -155,6 +155,8 @@ class LoginActivity : AppCompatActivity() {
      * 表示名保存.
      */
     private fun saveName(name: String) {
+        Log.d(TAG, "$CLASS_NAME.saveName")
+
         // Preferenceに保存.
         // TODO 非推奨になってる
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -167,7 +169,8 @@ class LoginActivity : AppCompatActivity() {
     /**
      *
      */
-    private fun createListeners() {
+    private fun createFirebaseListeners() {
+        Log.d(TAG, "$CLASS_NAME.createFirebaseListeners")
 
         //アカウント作成処理リスナー.
         mCreateAccountListener = OnCompleteListener { task ->
