@@ -68,6 +68,7 @@ class LoginActivity : AppCompatActivity() {
                 InputMethodManager.HIDE_IMPLICIT_ONLY
             )
 
+            // 入力情報を取得.
             val email = etEmail.text.toString()
             val password = etPassword.text.toString()
             val name = etName.text.toString()
@@ -97,6 +98,7 @@ class LoginActivity : AppCompatActivity() {
                 InputMethodManager.HIDE_IMPLICIT_ONLY
             )
 
+            // 入力値を取得.
             val email = etEmail.text.toString()
             val password = etPassword.text.toString()
 
@@ -158,7 +160,6 @@ class LoginActivity : AppCompatActivity() {
         Log.d(TAG, "$CLASS_NAME.saveName")
 
         // Preferenceに保存.
-        // TODO 非推奨になってる
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPreferences.edit()
         editor.putString(PREFERENCE_KEY_ACCOUNT_NAME, name)
@@ -167,7 +168,7 @@ class LoginActivity : AppCompatActivity() {
 
 
     /**
-     *
+     * Firebase関連のリスナを生成.
      */
     private fun createFirebaseListeners() {
         Log.d(TAG, "$CLASS_NAME.createFirebaseListeners")

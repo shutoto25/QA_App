@@ -20,7 +20,7 @@ class SettingActivity : AppCompatActivity() {
      */
     private val CLASS_NAME = "MainActivity"
     /**
-     *
+     * データベース.
      */
     private lateinit var mDataBaseReference: DatabaseReference
 

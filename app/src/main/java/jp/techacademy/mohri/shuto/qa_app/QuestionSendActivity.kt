@@ -1,6 +1,7 @@
 package jp.techacademy.mohri.shuto.qa_app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
@@ -38,11 +39,16 @@ class QuestionSendActivity : AppCompatActivity(),
      * クラス名.
      */
     private val CLASS_NAME = "MainActivity"
-
+    /**
+     * ジャンル番号.
+     */
     private var mGenre: Int = 0
+    /**
+     * 添付画像Uri.
+     */
     private var mPictureUri: Uri? = null
     /**
-     *
+     * staticのようなメンバ.
      */
     companion object {
         private val PERMISSIONS_REQUEST_CODE = 100
@@ -57,9 +63,9 @@ class QuestionSendActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_send)
 
-        // 渡ってきたジャンルの番号を保持する
+        // Extra情報からジャンル番号を取得.
         val extras = intent.extras
-        mGenre = extras!!.getInt("genre")
+        mGenre = extras!!.getInt(INTENT_EXTRA_KEY_GENRE)
 
         btSend.setOnClickListener(this)
         ivCapture.setOnClickListener(this)
@@ -70,16 +76,12 @@ class QuestionSendActivity : AppCompatActivity(),
 
 
     /**
-     * Intent連携:画像を取得してImageViewに設定.
+     * Intent連携:画像を取得してImageViewに設定. TODO
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "$CLASS_NAME.onActivityResult")
 
-        // TODO super読んでいいの？
-        super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == CHOOSER_REQUEST_CODE) {
-            // TODO
             if (resultCode != Activity.RESULT_OK) {
                 if (mPictureUri != null) {
                     contentResolver.delete(mPictureUri!!, null, null)
@@ -142,22 +144,21 @@ class QuestionSendActivity : AppCompatActivity(),
                     // Android M未満.
                     showChooser()
                 }
-
             }
             R.id.btSend -> {
                 // キーボードが出てたら閉じる
                 val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                im.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+                im.hideSoftInputFromWindow(view.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
 
                 val dataBaseReference = FirebaseDatabase.getInstance().reference
-                // TODO
+                // 保存先の参照を設定.
                 val genreRef = dataBaseReference.child(CONTENTS_PATH).child(mGenre.toString())
 
                 val data = HashMap<String, String>()
                 // UID(利用者識別用番号).
                 data["uid"] = FirebaseAuth.getInstance().currentUser!!.uid
 
-                // タイトルと本文を取得,
+                // タイトルと本文を取得.
                 val title = etTitle.text.toString()
                 val body = etSubject.text.toString()
 
@@ -185,7 +186,6 @@ class QuestionSendActivity : AppCompatActivity(),
 
                 // 添付画像が設定されていれば画像を取り出してBASE64エンコード.
                 // Firebaseは文字列や数字しか保存できない為.
-
                 if (drawable != null) {
                     val bitmap = drawable.bitmap
                     val baos = ByteArrayOutputStream()
@@ -195,6 +195,7 @@ class QuestionSendActivity : AppCompatActivity(),
                     data["image"] = bitmapString
                 }
 
+                // 保存先パスにユニークなIDを追加(Push)し、dataをセット.
                 genreRef.push().setValue(data, this)
                 progressBar.visibility = View.VISIBLE
             }
@@ -242,7 +243,7 @@ class QuestionSendActivity : AppCompatActivity(),
     private fun showChooser() {
         Log.d(TAG, "$CLASS_NAME.showChooser")
 
-        // ギャラリーから選択するIntent.TODO
+        // ギャラリーから選択するIntent.
         val galleryIntent = Intent(Intent.ACTION_GET_CONTENT)
         galleryIntent.type = "image/*"
         galleryIntent.addCategory(Intent.CATEGORY_OPENABLE)
