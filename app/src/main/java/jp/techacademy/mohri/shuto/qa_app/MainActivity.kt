@@ -44,6 +44,14 @@ class MainActivity : AppCompatActivity()
 
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+
+            // お気に入りの場合.
+            if (mGenre == 5){
+                for(i in 1 until 4){
+                mGenreRef = mDatabaseReference.child(CONTENTS_PATH).child(i.toString())
+                }
+            }
+
             val map = dataSnapshot.value as Map<String, String>
             val title = map["title"] ?: ""
             val body = map["body"] ?: ""
@@ -225,6 +233,10 @@ class MainActivity : AppCompatActivity()
                 mToolbar.title = getString(R.string.navigation_item_computer)
                 mGenre = 4
             }
+            R.id.navFavorite -> {
+                mToolbar.title = getString(R.string.navigation_item_favorite)
+                mGenre = 5
+            }
         }
         // ドロワーを閉じる.
         val drawer = findViewById<DrawerLayout>(R.id.drawerLayout)
@@ -239,7 +251,12 @@ class MainActivity : AppCompatActivity()
         if (mGenreRef != null) {
             mGenreRef!!.removeEventListener(mEventListener)
         }
-        mGenreRef = mDatabaseReference.child(CONTENTS_PATH).child(mGenre.toString())
+
+        if (mGenre == 5){
+            mGenreRef = mDatabaseReference.child(FAVORITE_PATH).child(FirebaseAuth.getInstance().currentUser!!.uid)
+        } else {
+            mGenreRef = mDatabaseReference.child(CONTENTS_PATH).child(mGenre.toString())
+        }
         mGenreRef!!.addChildEventListener(mEventListener)
 
         return true

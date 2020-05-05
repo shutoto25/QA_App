@@ -14,6 +14,10 @@ const val USERS_PATH = "users"
  */
 const val CONTENTS_PATH = "contents"
 /**
+ * Firebaseに質問を保存するバス
+ */
+const val FAVORITE_PATH = "favorite"
+/**
  * Firebaseに解答を保存するパス
  */
 const val ANSWERS_PATH = "answers"

@@ -1,30 +1,48 @@
 package jp.techacademy.mohri.shuto.qa_app
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.preference.PreferenceManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
+import androidx.appcompat.widget.ViewUtils
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import java.util.*
+import kotlin.collections.HashMap
 
-class QuestionDetailListAdapter(context: Context, private val mQustion: Question) : BaseAdapter() {
+/**
+ * 質問詳細リストアダプタ.
+ */
+class QuestionDetailListAdapter(context: Context, private val mQuestion: Question) : BaseAdapter() {
+
     companion object {
+        /**
+         * 質問リストレイアウト.
+         */
         private val TYPE_QUESTION = 0
+        /**
+         * 回答リストレイアウト.
+         */
         private val TYPE_ANSWER = 1
     }
 
+    private var mSharedPreferences: SharedPreferences? =null
     private var mLayoutInflater: LayoutInflater? = null
 
     init {
         mLayoutInflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     override fun getCount(): Int {
-        return 1 + mQustion.answers.size
+        return 1 + mQuestion.answers.size
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -41,7 +59,7 @@ class QuestionDetailListAdapter(context: Context, private val mQustion: Question
     }
 
     override fun getItem(position: Int): Any {
-        return mQustion
+        return mQuestion
     }
 
     override fun getItemId(position: Int): Long {
@@ -57,8 +75,8 @@ class QuestionDetailListAdapter(context: Context, private val mQustion: Question
                 convertView =
                     mLayoutInflater!!.inflate(R.layout.list_question_detail, parent, false)!!
             }
-            val body = mQustion.body
-            val name = mQustion.name
+            val body = mQuestion.body
+            val name = mQuestion.name
 
             val bodyTextView = convertView.findViewById<View>(R.id.tvBody) as TextView
             bodyTextView.text = body
@@ -66,7 +84,7 @@ class QuestionDetailListAdapter(context: Context, private val mQustion: Question
             val nameTextView = convertView.findViewById<View>(R.id.tvName) as TextView
             nameTextView.text = name
 
-            val bytes = mQustion.imageBytes
+            val bytes = mQuestion.imageBytes
             if (bytes.isNotEmpty()) {
                 val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                     .copy(Bitmap.Config.ARGB_8888, true)
@@ -78,7 +96,7 @@ class QuestionDetailListAdapter(context: Context, private val mQustion: Question
             if (convertView == null) {
                 convertView = mLayoutInflater!!.inflate(R.layout.list_answer, parent, false)!!
             }
-            val answer = mQustion.answers[position - 1]
+            val answer = mQuestion.answers[position - 1]
             val body = answer.body
             val name = answer.name
 

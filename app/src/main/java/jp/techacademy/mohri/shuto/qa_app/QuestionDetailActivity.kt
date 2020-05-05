@@ -2,16 +2,28 @@ package jp.techacademy.mohri.shuto.qa_app
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_question_detail.*
 
-class QuestionDetailActivity : AppCompatActivity() {
+/**
+ * 質問詳細画面.
+ */
+class QuestionDetailActivity : AppCompatActivity() ,View.OnClickListener{
+    /**
+     * クラス名.
+     */
+    private val CLASS_NAME = "QuestionDetailActivity"
+
+    private var LOGIN = true
 
     private lateinit var mQuestion: Question
     private lateinit var mAdapter: QuestionDetailListAdapter
     private lateinit var mAnswerRef: DatabaseReference
+    private lateinit var favRef: DatabaseReference
 
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
@@ -34,13 +46,22 @@ class QuestionDetailActivity : AppCompatActivity() {
             mQuestion.answers.add(answer)
             mAdapter.notifyDataSetChanged()
         }
-
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
-
         override fun onChildRemoved(dataSnapshot: DataSnapshot) {}
-
         override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
+        override fun onCancelled(databaseError: DatabaseError) {}
+    }
 
+    /**
+     * お気に入り用リスナ.
+     */
+    private val mFavListener = object : ChildEventListener {
+        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+            btButton.text = "favorite"
+        }
+        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
+        override fun onChildRemoved(dataSnapshot: DataSnapshot) {}
+        override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
         override fun onCancelled(databaseError: DatabaseError) {}
     }
 
@@ -48,6 +69,7 @@ class QuestionDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_detail)
+        Log.d(TAG, "$CLASS_NAME.onCreate")
 
         // 渡ってきたQuestionのオブジェクトを保持する
         val extras = intent.extras
@@ -79,5 +101,39 @@ class QuestionDetailActivity : AppCompatActivity() {
         mAnswerRef = dataBaseReference.child(CONTENTS_PATH)
             .child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(ANSWERS_PATH)
         mAnswerRef.addChildEventListener(mEventListener)
+
+        // ログインしている場合にのみお気に入りボタンを表示する.
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            favRef = dataBaseReference.child(FAVORITE_PATH)
+                .child(FirebaseAuth.getInstance().currentUser!!.uid).child(mQuestion.questionUid)
+            favRef.addChildEventListener(mFavListener)
+            btButton.setOnClickListener(this)
+            LOGIN = true
+        } else {
+            // ボタン非表示.
+            btButton.visibility = View.GONE
+            LOGIN = false
+        }
+
+    }
+
+
+    override fun onClick(view: View) {
+
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+        favRef = dataBaseReference.child(FAVORITE_PATH)
+            .child(FirebaseAuth.getInstance().currentUser!!.uid).child(mQuestion.questionUid)
+
+        if (btButton.text.toString() == "favorite") {
+            // お気に入りから削除.
+            btButton.text = "not favorite"
+            favRef.removeValue()
+        } else {
+            // お気に入りに追加.
+            val favData = HashMap<String, String>()
+            favData[mQuestion.questionUid] = mQuestion.questionUid
+            favRef.setValue(favData)
+        }
     }
 }

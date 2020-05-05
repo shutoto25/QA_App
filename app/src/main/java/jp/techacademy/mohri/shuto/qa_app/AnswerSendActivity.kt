@@ -13,6 +13,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_answer_send.*
 
+/**
+ * 回答送信画面.
+ */
 class AnswerSendActivity : AppCompatActivity(), View.OnClickListener,
     DatabaseReference.CompletionListener {
 

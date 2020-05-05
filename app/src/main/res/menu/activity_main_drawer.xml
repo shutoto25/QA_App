@@ -14,5 +14,8 @@
         <item
             android:id="@+id/navCompter"
             android:title="@string/navigation_item_computer" />
+        <item
+            android:id="@+id/navFavorite"
+            android:title="@string/navigation_item_favorite" />
     </group>
 </menu>

@@ -21,6 +21,7 @@
     <string name="navigation_item_life">生活</string>
     <string name="navigation_item_health">健康</string>
     <string name="navigation_item_computer">コンピュータ</string>
+    <string name="navigation_item_favorite">お気に入り</string>
 
     <!--設定画面-->
     <string name="settings_hint_display_name">表示名</string>

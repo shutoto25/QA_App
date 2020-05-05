@@ -16,6 +16,13 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
+    <Button
+        android:id="@+id/btButton"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:text="non favorite" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
