@@ -12,19 +12,28 @@ import kotlinx.android.synthetic.main.activity_question_detail.*
 /**
  * 質問詳細画面.
  */
-class QuestionDetailActivity : AppCompatActivity() ,View.OnClickListener{
+class QuestionDetailActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * クラス名.
      */
     private val CLASS_NAME = "QuestionDetailActivity"
-
+    /**
+     * ログイン状態.
+     */
     private var LOGIN = true
+    /**
+     * 設定ジャンル一時保存.
+     */
+    private var mGenreTemp:Long? = null
 
     private lateinit var mQuestion: Question
     private lateinit var mAdapter: QuestionDetailListAdapter
     private lateinit var mAnswerRef: DatabaseReference
     private lateinit var favRef: DatabaseReference
 
+    /**
+     * イベントリスナ.
+     */
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
             val map = dataSnapshot.value as Map<String, String>
@@ -57,8 +66,11 @@ class QuestionDetailActivity : AppCompatActivity() ,View.OnClickListener{
      */
     private val mFavListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+            // 画面表示時に現在のジャンルを取得しておく.
+            mGenreTemp = dataSnapshot.value as Long
             btButton.text = "favorite"
         }
+
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
         override fun onChildRemoved(dataSnapshot: DataSnapshot) {}
         override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
@@ -101,10 +113,15 @@ class QuestionDetailActivity : AppCompatActivity() ,View.OnClickListener{
         mAnswerRef = dataBaseReference.child(CONTENTS_PATH)
             .child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(ANSWERS_PATH)
         mAnswerRef.addChildEventListener(mEventListener)
+    }
 
+
+    override fun onStart() {
+        super.onStart()
         // ログインしている場合にのみお気に入りボタンを表示する.
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
+            val dataBaseReference = FirebaseDatabase.getInstance().reference
             favRef = dataBaseReference.child(FAVORITE_PATH)
                 .child(FirebaseAuth.getInstance().currentUser!!.uid).child(mQuestion.questionUid)
             favRef.addChildEventListener(mFavListener)
@@ -115,9 +132,15 @@ class QuestionDetailActivity : AppCompatActivity() ,View.OnClickListener{
             btButton.visibility = View.GONE
             LOGIN = false
         }
-
     }
 
+
+    override fun onStop() {
+        super.onStop()
+        if(LOGIN) {
+            favRef.removeEventListener(mFavListener)
+        }
+    }
 
     override fun onClick(view: View) {
 
@@ -131,8 +154,14 @@ class QuestionDetailActivity : AppCompatActivity() ,View.OnClickListener{
             favRef.removeValue()
         } else {
             // お気に入りに追加.
-            val favData = HashMap<String, String>()
-            favData[mQuestion.questionUid] = mQuestion.questionUid
+            val favData = HashMap<String, Long>()
+            if (mGenreTemp != null) {
+                // 一時取得したジャンルがある場合はそのIDをセット(お気に入りでセットされることを防ぎたい為)
+                favData["genre"] = mGenreTemp!!
+                mGenreTemp = null
+            } else {
+                favData["genre"] = mQuestion.genre.toLong()
+            }
             favRef.setValue(favData)
         }
     }

@@ -131,7 +131,6 @@ class LoginActivity : AppCompatActivity() {
         // プログレスバー表示.
         pbProgressBar.visibility = View.VISIBLE
 
-        // TODO これ毎回リスナ追加して平気なん?
         // アカウント作成(タスク完了時に呼び出されるリスナを追加).
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(mCreateAccountListener)
@@ -202,7 +201,7 @@ class LoginActivity : AppCompatActivity() {
                 val user = mAuth.currentUser
                 val userRef = mDataBaseReference.child(USERS_PATH).child(user!!.uid)
 
-                // TODO アカウント作成されてない場合.??
+                //アカウント作成されてない場合??
                 if (mIsCreateAccount) {
                     val name = etName.text.toString()
                     val data = HashMap<String, String>()

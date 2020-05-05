@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.widget.ListView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -41,16 +42,13 @@ class MainActivity : AppCompatActivity()
     private lateinit var mAdapter: QuestionListAdapter
 
     private var mGenreRef: DatabaseReference? = null
+    private var mFavRef: DatabaseReference? = null
 
+    /**
+     * イベントリスナ.
+     */
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
-
-            // お気に入りの場合.
-            if (mGenre == 5){
-                for(i in 1 until 4){
-                mGenreRef = mDatabaseReference.child(CONTENTS_PATH).child(i.toString())
-                }
-            }
 
             val map = dataSnapshot.value as Map<String, String>
             val title = map["title"] ?: ""
@@ -106,11 +104,87 @@ class MainActivity : AppCompatActivity()
                 }
             }
         }
-
         override fun onChildRemoved(p0: DataSnapshot) {}
-
         override fun onChildMoved(p0: DataSnapshot, p1: String?) {}
+        override fun onCancelled(p0: DatabaseError) {}
+    }
 
+
+    /**
+     * お気に入り用リスナ.
+     */
+    private val mFavListener = object : ChildEventListener {
+        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+            // dataSnapShotから質問IDとジャンルIDを取得.
+            val questionId = dataSnapshot.key
+            val genreMap = dataSnapshot.value as Map<String, Long>
+            val genre = genreMap["genre"] ?: 0
+            val favRef = mDatabaseReference.child(CONTENTS_PATH).child(genre.toString()).child(questionId.toString())
+            favRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val map = dataSnapshot.value as Map<String, String>
+                    val title = map["title"] ?: ""
+                    val body = map["body"] ?: ""
+                    val name = map["name"] ?: ""
+                    val uid = map["uid"] ?: ""
+                    val imageString = map["image"] ?: ""
+                    val bytes =
+                        if (imageString.isNotEmpty()) {
+                            Base64.decode(imageString, Base64.DEFAULT)
+                        } else {
+                            byteArrayOf()
+                        }
+
+                    val answerArrayList = ArrayList<Answer>()
+                    val answerMap = map["answers"] as Map<String, String>?
+                    if (answerMap != null) {
+                        for (key in answerMap.keys) {
+                            val temp = answerMap[key] as Map<String, String>
+                            val answerBody = temp["body"] ?: ""
+                            val answerName = temp["name"] ?: ""
+                            val answerUid = temp["uid"] ?: ""
+                            val answer = Answer(answerBody, answerName, answerUid, key)
+                            answerArrayList.add(answer)
+                        }
+                    }
+                    val question = Question(
+                        title, body, name, uid, dataSnapshot.key ?: "",
+                        mGenre, bytes, answerArrayList
+                    )
+                    mQuestionArrayList.add(question)
+                    mAdapter.notifyDataSetChanged()
+                }
+
+                override fun onCancelled(p0: DatabaseError) {}
+            })
+        }
+
+
+        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
+            val map = dataSnapshot.value as Map<String, String>
+
+            // 変更があったQuestionを探す
+            for (question in mQuestionArrayList) {
+                if (dataSnapshot.key.equals(question.questionUid)) {
+                    // このアプリで変更がある可能性があるのは回答(Answer)のみ
+                    question.answers.clear()
+                    val answerMap = map["answers"] as Map<String, String>?
+                    if (answerMap != null) {
+                        for (key in answerMap.keys) {
+                            val temp = answerMap[key] as Map<String, String>
+                            val answerBody = temp["body"] ?: ""
+                            val answerName = temp["name"] ?: ""
+                            val answerUid = temp["uid"] ?: ""
+                            val answer = Answer(answerBody, answerName, answerUid, key)
+                            question.answers.add(answer)
+                        }
+                    }
+                    mAdapter.notifyDataSetChanged()
+                }
+            }
+        }
+        override fun onChildRemoved(p0: DataSnapshot) {}
+        override fun onChildMoved(p0: DataSnapshot, p1: String?) {}
         override fun onCancelled(p0: DatabaseError) {}
     }
 
@@ -175,11 +249,27 @@ class MainActivity : AppCompatActivity()
 
         // 趣味を既定の選択とする
         if(mGenre == 0) {
-            //TODO 共通的な場所作って起動時はそのにしたい今は一番上の趣味が選択される
             onNavigationItemSelected(navigationView.menu.getItem(0))
+        }
+        // ログイン状態に応じてメニュー表示を変える..
+        val menu = navigationView.menu
+        val menuItem = menu.findItem(R.id.navFavorite)
+        if(FirebaseAuth.getInstance().currentUser != null){
+            menuItem.setVisible(true)
+        }else{
+            menuItem.setVisible(false)
         }
     }
 
+
+    override fun onStop() {
+        super.onStop()
+
+        if(mFavRef != null){
+            mFavRef!!.removeEventListener(mFavListener)
+        }
+
+    }
 
     /**
      * オプションメニューをインフレート.
@@ -251,14 +341,14 @@ class MainActivity : AppCompatActivity()
         if (mGenreRef != null) {
             mGenreRef!!.removeEventListener(mEventListener)
         }
-
         if (mGenre == 5){
-            mGenreRef = mDatabaseReference.child(FAVORITE_PATH).child(FirebaseAuth.getInstance().currentUser!!.uid)
+            // お気に入りの場合は専用のリスナをセットする.
+            mFavRef = mDatabaseReference.child(FAVORITE_PATH).child(FirebaseAuth.getInstance().currentUser!!.uid)
+            mFavRef!!.addChildEventListener(mFavListener)
         } else {
             mGenreRef = mDatabaseReference.child(CONTENTS_PATH).child(mGenre.toString())
+            mGenreRef!!.addChildEventListener(mEventListener)
         }
-        mGenreRef!!.addChildEventListener(mEventListener)
-
         return true
     }
 }
